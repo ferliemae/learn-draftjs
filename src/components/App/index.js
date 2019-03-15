@@ -1,70 +1,84 @@
-import React from 'react';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
-
-// Import styles
+import React, { Component } from 'react';
+// import Button from '@material-ui/core/Button';
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import { style } from 'typestyle';
+import RichEditorExample from '../Examples/RichEditor';
+import database from '../../database';
 import 'bootstrap/dist/css/bootstrap.css';
 import './index.css';
 
-import Sidebar from '../Sidebar';
+const className = style({
+	margin: '10px'
+})
+class App extends Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			articles: []
+		}
+	}
 
-import Introduction from '../DraftTuts/Introduction';
-import Dependencies from '../DraftTuts/Dependencies';
-import SimplestEditor from '../DraftTuts/SimplestEditor';
+	componentDidMount() {
+		this.getArticles();
+	}
 
-import DataModel from '../DraftTuts/DataModel';
-import SelectionState from '../DraftTuts/SelectionState';
-import ContentState from '../DraftTuts/ContentState';
-import Entities from '../DraftTuts/Entities';
-import Decorators from '../DraftTuts/Decorators';
+	getArticles = () => {
+		const articles = [];
+		
+		database.ref("/draftjs").on("child_added", snap => {
+			articles.push(snap.key);
+			this.setState({
+				articles: articles
+			});
+		});
+	}
 
-import Utils from '../DraftTuts/Utils';
+	deleteArticle = (article) => {
+		database.ref(`/draftjs/${article}`).remove()
+		.then(this.getArticles());
+	}
 
-import Examples from '../Examples';
-import RichEditorExample from '../Examples/RichEditor';
-import MediaEditorExample from '../Examples/MediaEditor';
+	render() {
+		const { articles } = this.state;
+		return (
+			<Router>
+				<div style={styles.wrapper}>
+					<h3>ARTICLES</h3>
+					<ul>
+					{
+						articles.map((article) => {
+							let route = `/${article}`
+							return(
+									<li>
+										<Link className={className} to={route}>{ article }</Link>
+										<button className="btn-danger btn-xs" onClick={() => this.deleteArticle(article)} >Delete</button>
+									</li>
+									
+							)
+						})
+					}
+					<li><Link to="/new">New</Link></li>
+					</ul>
 
-import Textareas from '../Textareas';
-
-import Questions from '../Questions';
-
-const App = () => {
-	let wrapperDivInstance;
-	const toggleSidebar = () => wrapperDivInstance.classList.toggle('sidebar-open');
-	const renderFn = (Component) => (props) => (<Component
-		{...props}
-		toggleSidebar={toggleSidebar}
-	/>);
-	return (
-		<Router>
-			<div
-				id="wrapper"
-				className="sidebar-open"
-				ref={c => { wrapperDivInstance = c; }}
-			>
-				<Route path="/" component={Sidebar}/>
-
-				<Route exact path="/" render={renderFn(Introduction)}/>
-				<Route path="/dependencies" render={renderFn(Dependencies)}/>
-				<Route path="/simplest-editor" render={renderFn(SimplestEditor)}/>
-
-				<Route path="/data-model" render={renderFn(DataModel)}/>
-				<Route path="/selection-state" render={renderFn(SelectionState)}/>
-				<Route path="/content-state" render={renderFn(ContentState)}/>
-				<Route path="/entities" render={renderFn(Entities)}/>
-				<Route path="/decorators" render={renderFn(Decorators)}/>
-
-				<Route path="/utils" render={renderFn(Utils)}/>
-
-				<Route path="/examples" render={renderFn(Examples)}/>
-				<Route path="/rich-editor-example" render={renderFn(RichEditorExample)}/>
-				<Route path="/media-editor-example" render={renderFn(MediaEditorExample)}/>
-
-				<Route path="/textareas" render={renderFn(Textareas)}/>
-
-				<Route path="/questions" render={renderFn(Questions)}/>
-			</div>
-		</Router>
-	);
+					<hr />
+					
+					{
+						articles.map((article) => {
+									let route = `/${article}`
+									return (<Route path={route} render={() => <RichEditorExample articleId={article}/>} />)
+								})
+					}
+					
+					<Route path="/new" render={()=> <RichEditorExample />} />
+				</div>
+  			</Router>
+		);
+	}
 }
 
+const styles = {
+	wrapper: {
+		margin: '70px'
+	}
+}
 export default App

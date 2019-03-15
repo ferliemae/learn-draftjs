@@ -39,6 +39,7 @@ export default class MediaEditorExample extends Component {
 		this.confirmMedia = this._confirmMedia.bind(this);
 		this.handleKeyCommand = this._handleKeyCommand.bind(this);
 		this.onURLInputKeyDown = this._onURLInputKeyDown.bind(this);
+		this.saveData = this._saveData.bind(this);
 	}
 
 	_handleKeyCommand(command) {
@@ -93,6 +94,10 @@ export default class MediaEditorExample extends Component {
 
 	_addVideo() {
 		this._promptForMedia('video');
+	}
+
+	_saveData() {
+		console.log("Saving data");
 	}
 
 	render() {
@@ -162,6 +167,7 @@ export default class MediaEditorExample extends Component {
 						ref="editor"
 					/>
 				</div>
+				<button onClick={this.saveData}>SAVE</button>
 				<ConsoleButtons
 					buttons={[
 						{
