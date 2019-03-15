@@ -52,7 +52,7 @@ export default class EditorAndConsoleContainer extends Component {
 						}
 					)
 				)}
-				{consoleContainer(this.state.consoleLog)}
+				{/* {consoleContainer(this.state.consoleLog)} */}
 			</div>
 		);
 	}
